@@ -21,23 +21,39 @@ export class ContatoComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    
+    this.montarFormulario();
+
+    this.listarContatos();
+  }
+
+  montarFormulario() {
     this.formulario = this.fb.group({
       nome: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]]
-    })
-
-    
+    });
   }
-  
-  submit(){
+
+  listarContatos() {
+    this.service.list()
+      .subscribe(data => {
+        this.contatos = data;
+      });
+  }
+
+  favoritar(contato: Contato){
+    this.service.favorite(contato).subscribe(data => {
+      contato.favorito = !contato.favorito;   
+    })
+  }
+
+  submit() {
     const formValues = this.formulario.value;
 
     const contato: Contato = new Contato(formValues.nome, formValues.email);
 
-    this.service.save(contato).subscribe( data => {
-      this.contatos.push(data);
-      console.log(this.contatos)
+    this.service.save(contato).subscribe(data => {
+      let lista: Contato[] = [...this.contatos, data];
+      this.contatos = lista
     });
   }
 
